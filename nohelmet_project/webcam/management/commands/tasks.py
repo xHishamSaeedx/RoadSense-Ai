@@ -27,5 +27,6 @@ def capture_frames():
             url = 'http://localhost:4000/receive_frame'  # Replace with your Node.js server endpoint
             response = requests.post(url, data={'frame': encoded_frame})
             
+        cv2.waitKey(1)
 
     cap.release()
