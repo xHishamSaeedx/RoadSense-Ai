@@ -7,27 +7,20 @@ import requests
 import base64
 
 @shared_task
-def capture_frames():
-
-    print("helloooo")
+def capture_frames2():
     print("Starting capture_frames task...")
 
-    cap = cv2.VideoCapture(0)  # Access the default webcam (change 0 if using multiple cameras)
+    cap = cv2.VideoCapture(1)  # Access the default webcam (change 0 if using multiple cameras)
 
     while True:
         ret, frame = cap.read()
 
         if ret:
 
-            cv2.imshow("image", frame)
-    
-
             _, buffer = cv2.imencode('.jpg', frame)
             frame_bytes = buffer.tobytes()
 
-            
-
-            # #Encode frame as base64 for transmission
+            # # Encode frame as base64 for transmission
             # encoded_frame = base64.b64encode(frame_bytes).decode('utf-8')
 
             # # Send frame to Node.js server

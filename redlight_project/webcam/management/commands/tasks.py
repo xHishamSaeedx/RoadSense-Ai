@@ -10,7 +10,7 @@ import base64
 def capture_frames():
     print("Starting capture_frames task...")
 
-    cap = cv2.VideoCapture(1)  # Access the default webcam (change 0 if using multiple cameras)
+    cap = cv2.VideoCapture(0)  # Access the default webcam (change 0 if using multiple cameras)
 
     while True:
         ret, frame = cap.read()

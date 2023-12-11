@@ -7,19 +7,19 @@ import requests
 import base64
 
 @shared_task
-def capture_frames():
+def capture_frames2():
 
     print("helloooo")
     print("Starting capture_frames task...")
 
-    cap = cv2.VideoCapture(0)  # Access the default webcam (change 0 if using multiple cameras)
+    cap = cv2.VideoCapture(1)  # Access the default webcam (change 0 if using multiple cameras)
 
     while True:
         ret, frame = cap.read()
 
         if ret:
 
-            cv2.imshow("image", frame)
+            cv2.imshow("image2", frame)
     
 
             _, buffer = cv2.imencode('.jpg', frame)

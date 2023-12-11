@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "webcam.apps.WebcamConfig",
+    "wrong_side.apps.WrongSideConfig"
 ]
 
 # Celery Configuration
