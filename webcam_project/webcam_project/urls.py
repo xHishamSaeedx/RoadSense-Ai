@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from webcam_project import routing 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('webcam/', include('webcam_app.urls')),  # Include app-specific URLs
     # ... other URL patterns
-    path('ws/', include('webcam_project.routing')),  # Include WebSocket routing
+    path('ws/', include(routing.websocket_urlpatterns)),  # Include WebSocket routing
 ]
