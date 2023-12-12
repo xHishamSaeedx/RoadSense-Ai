@@ -12,7 +12,7 @@ def capture_frames2():
     print("helloooo")
     print("Starting capture_frames task...")
 
-    cap = cv2.VideoCapture(1)  # Access the default webcam (change 0 if using multiple cameras)
+    cap = cv2.VideoCapture('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\motorbikes2.mp4')  # Access the default webcam (change 0 if using multiple cameras)
 
     while True:
         ret, frame = cap.read()
