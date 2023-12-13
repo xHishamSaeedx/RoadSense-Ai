@@ -133,33 +133,36 @@ def capture_frames3():
                     x1_num, y1_num, x2_num, y2_num = num
                     if inside_box([x1r,y1r,x2r,y2r], [x1_num, y1_num, x2_num, y2_num]):
 
-                        # if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'number_plate'].values[0]):
-                        try:
-                            num_img = orifinal_frame[y1_num:y2_num, x1_num:x2_num]
-                            cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg', num_img)
-                            temp_data.loc[temp_data['ID'] == Id, 'number_plate'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg'
-                        except:
-                            print('could not save number plate')
+                        if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'number_plate'].values[0]):
+                            try:
+                                num_img = orifinal_frame[y1_num:y2_num, x1_num:x2_num]
+                                cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg', num_img)
+                                temp_data.loc[temp_data['ID'] == Id, 'number_plate'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg'
+                            except:
+                                print('could not save number plate')
 
-                # if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'Rider'].values[0]):
-                try:
-                    cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg', rider_img)
-                    temp_data.loc[temp_data['ID'] == Id, 'Rider'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg'
-                    
+                if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'Rider'].values[0]):
+                    try:
+                        cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg', rider_img)
+                        temp_data.loc[temp_data['ID'] == Id, 'Rider'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg'
                         
-                except:
-                    print('could not save rider')
+                            
+                    except:
+                        print('could not save rider')
                     
 
             cv2.imshow("image", frame)
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
+            
 
         
         else:
-            break
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            continue
+
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
         nohelmet_data = extract_and_add_rows(temp_data, nohelmet_data)
         nohelmet_data.to_csv('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\nohelmet_data.csv', index=False)
@@ -168,7 +171,7 @@ def capture_frames3():
 
         
     cap.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
             
 
     
