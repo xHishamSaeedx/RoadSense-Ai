@@ -10,8 +10,8 @@ def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "redlight_project.settings")
     try:
-        command = 'celery -A redlight_project worker -l info'
-        Popen(shlex.split(command))
+        # command = 'celery -A redlight_project worker -l info'
+        # Popen(shlex.split(command))
 
         from django.core.management import execute_from_command_line
     except ImportError as exc:
