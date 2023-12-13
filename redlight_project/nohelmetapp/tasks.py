@@ -114,20 +114,22 @@ def capture_frames3():
                                 offset=10)
 
                 rider_img = orifinal_frame[y1r:y2r , x1r:x2r]
-                rider_coords = [x1r,y1r,x2r,y2r]
-                helmet_present = img_classify(rider_coords, helmet_list , nohelmet_list)
 
-                if helmet_present[0] == False: # if helmet absent 
-                    temp_data.loc[temp_data['ID'] == Id, 'helmet'] = False
+                if temp_data.loc[temp_data['ID'] == Id, 'helmet'].values[0] == True:
+                    rider_coords = [x1r,y1r,x2r,y2r]
+                    helmet_present = img_classify(rider_coords, helmet_list , nohelmet_list)
 
-                    for hd in nohelmet_list:
-                        x1hd, y1hd, x2hd, y2hd = hd
-                        x1hd, y1hd, x2hd, y2hd = int(x1hd), int(y1hd), int(x2hd), int(y2hd)
-                        w,h = x2hd - x1hd , y2hd-y1hd
-                        if inside_box([x1r,y1r,x2r,y2r], [x1hd,y1hd,x2hd,y2hd]):
-                            cvzone.cornerRect(frame, (x1hd, y1hd, w, h), l=9 , rt = 2, colorR = (255,0,255))
-                            cvzone.putTextRect(frame, f"NO HELMET", (max(0, x1hd), max(35, y1hd)), scale=2, thickness=3,
-                                            offset=10)
+                    if helmet_present[0] == False: # if helmet absent 
+                        temp_data.loc[temp_data['ID'] == Id, 'helmet'] = False
+
+                for hd in nohelmet_list:
+                    x1hd, y1hd, x2hd, y2hd = hd
+                    x1hd, y1hd, x2hd, y2hd = int(x1hd), int(y1hd), int(x2hd), int(y2hd)
+                    w,h = x2hd - x1hd , y2hd-y1hd
+                    if inside_box([x1r,y1r,x2r,y2r], [x1hd,y1hd,x2hd,y2hd]):
+                        cvzone.cornerRect(frame, (x1hd, y1hd, w, h), l=9 , rt = 2, colorR = (255,0,255))
+                        cvzone.putTextRect(frame, f"NO HELMET", (max(0, x1hd), max(35, y1hd)), scale=2, thickness=3,
+                                        offset=10)
 
                 for num in number_list:
                     x1_num, y1_num, x2_num, y2_num = num
