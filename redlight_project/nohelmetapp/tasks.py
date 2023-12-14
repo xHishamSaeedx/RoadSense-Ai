@@ -10,7 +10,7 @@ from ultralytics import YOLO
 import cv2
 import cvzone
 import math
-from .models import redLight_collection
+from .models import nohelmet_collection
 
 from .sort import *
 
