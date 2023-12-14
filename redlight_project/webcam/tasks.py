@@ -103,11 +103,16 @@ def capture_frames():
                     if limits[0] < cx < limits[2] and limits[1] - 15 < cy < limits[1] + 15:
                         cv2.line(img, (limits[0], limits[1]), (limits[2], limits[3]), (0, 255, 0), 5)
                         #write a code to save the cropped image of orifinal_frame the coords of which r x1,y1,x2,y2
+                        
                         vehicle_img = orifinal_frame[y1:y2,x1:x2]
-                        cv2.imwrite(f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\vehicle_pictures\\{Id}.jpg", vehicle_img)
-                        #write a code to append a row with in the main_data with this pathway above Vehicle column and Id for ID column
-                        row = {'Vehicle': f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\vehicle_pictures\\{Id}.jpg", 'number_plate': None, 'ID': Id}
-                        main_data = main_data.append(row, ignore_index=True)
+
+                        if Id not in main_data['ID'].values:
+                            cv2.imwrite(f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\vehicle_pictures\\{Id}.jpg", vehicle_img)
+                            #write a code to append a row with in the main_data with this pathway above Vehicle column and Id for ID column
+                            row = {'Vehicle': f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\vehicle_pictures\\{Id}.jpg", 'number_plate': None, 'ID': Id}
+                            main_data = main_data.append(row, ignore_index=True)
+
+
                         vehicle_img = np.ascontiguousarray(vehicle_img)
                         # #write a code to apply npmodel on the vehicle_img and get back the x1,y1,x2,y2 coords
                         results2 = npmodel(vehicle_img, stream=True)
