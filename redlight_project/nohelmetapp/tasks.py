@@ -10,6 +10,7 @@ from ultralytics import YOLO
 import cv2
 import cvzone
 import math
+from .models import redLight_collection
 
 from .sort import *
 
@@ -159,6 +160,33 @@ def capture_frames3():
 
         
         else:
+            nohelmet_data = extract_and_add_rows(temp_data, nohelmet_data)
+            records = []
+            for index, row in nohelmet_data.iterrows():
+                vehicle_path = row['Rider']
+                number_plate_path = row['number_plate']
+                ID = row['ID']
+
+                if vehicle_path is not None and number_plate_path is not None:
+                    with open(vehicle_path, "rb") as vehicle_file, open(number_plate_path, "rb") as number_plate_file:
+                        vehicle_image = base64.b64encode(vehicle_file.read()).decode('utf-8')
+                        number_plate_image = base64.b64encode(number_plate_file.read()).decode('utf-8')
+                            
+                    record = {
+                        "vehicle": vehicle_image,
+                        "number_plate": number_plate_image,
+                        "ID": ID
+                    }
+
+                    records.append(record)
+
+            for rcrd in records:    
+                nohelmet_collection.insert_one(rcrd)
+            
+            nohelmet_data.drop(nohelmet_data.index, inplace=True)
+            temp_data.drop(temp_data.index, inplace=True)
+
+
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
 
@@ -166,7 +194,7 @@ def capture_frames3():
         if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        nohelmet_data = extract_and_add_rows(temp_data, nohelmet_data)
+        
         nohelmet_data.to_csv('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\nohelmet_data.csv', index=False)
         
 

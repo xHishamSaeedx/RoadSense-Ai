@@ -11,7 +11,7 @@ import cvzone
 import math
 from .sort import *
 import pandas as pd 
-from .models import person_collection 
+from .models import person_collection , redLight_collection
 import base64
 
 def image_to_base64(image_path):
@@ -183,7 +183,7 @@ def capture_frames():
                     records.append(record)
 
             for rcrd in records:    
-                person_collection.insert_one(rcrd)
+                redLight_collection.insert_one(rcrd)
             
             main_data.drop(main_data.index, inplace=True)
 

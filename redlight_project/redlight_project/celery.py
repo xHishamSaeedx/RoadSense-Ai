@@ -1,16 +1,15 @@
 # celery.py (in your Django project directory or app directory)
 from __future__ import absolute_import, unicode_literals
-import os
 from celery import Celery
+import os
 from django.conf import settings
 import multiprocessing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'redlight_project.settings')
 
 app = Celery('redlight_project')
-
 app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS )
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 from webcam.tasks import capture_frames
 from wrong_side.tasks import capture_frames2
 from nohelmetapp.tasks import capture_frames3
