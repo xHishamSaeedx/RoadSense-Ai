@@ -183,6 +183,7 @@ def capture_frames3():
             for rcrd in records:    
                 nohelmet_collection.insert_one(rcrd)
             
+            nohelmet_data.to_csv('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\nohelmet_data.csv', index=False)
             nohelmet_data.drop(nohelmet_data.index, inplace=True)
             temp_data.drop(temp_data.index, inplace=True)
 
@@ -195,7 +196,7 @@ def capture_frames3():
                 break
 
         
-        nohelmet_data.to_csv('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\nohelmet_data.csv', index=False)
+        
         
 
 

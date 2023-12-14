@@ -160,8 +160,7 @@ def capture_frames():
                 flag = not flag  # Toggle the value of the flag variable
 
             #convert main_data to csv file and store it in number_plates folder
-            main_data.to_csv("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\main_data.csv")
-
+            
         else:
             records = []
             for index, row in main_data.iterrows():
@@ -184,6 +183,9 @@ def capture_frames():
 
             for rcrd in records:    
                 redLight_collection.insert_one(rcrd)
+            
+            main_data.to_csv("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\main_data.csv")
+
             
             main_data.drop(main_data.index, inplace=True)
 
