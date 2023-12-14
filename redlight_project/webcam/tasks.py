@@ -11,6 +11,16 @@ import cvzone
 import math
 from .sort import *
 import pandas as pd 
+from .models import person_collection 
+import base64
+
+def image_to_base64(image_path):
+    with open(image_path, "rb") as img_file:
+        # Read the image file and encode it as base64
+        encoded_image = base64.b64encode(img_file.read()).decode("utf-8")
+        # Create a JSON object containing the base64-encoded image
+        image_json = {"image": encoded_image}
+        return image_json
 
 @shared_task
 def capture_frames():
@@ -153,6 +163,28 @@ def capture_frames():
             main_data.to_csv("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\main_data.csv")
 
         else:
+            records = []
+            for index, row in main_data.iterrows():
+                vehicle_path = row['Vehicle']
+                number_plate_path = row['number_plate']
+                ID = row['ID']
+
+                if vehicle_path is not None and number_plate_path is not None:
+                    with open(vehicle_path, "rb") as vehicle_file, open(number_plate_path, "rb") as number_plate_file:
+                        vehicle_image = base64.b64encode(vehicle_file.read()).decode('utf-8')
+                        number_plate_image = base64.b64encode(number_plate_file.read()).decode('utf-8')
+                            
+                    record = {
+                        "vehicle": vehicle_image,
+                        "number_plate": number_plate_image,
+                        "ID": ID
+                    }
+
+                    records.append(record)
+
+                for rcrd in records:    
+                    person_collection.insert_one(rcrd)
+
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
         
