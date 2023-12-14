@@ -182,8 +182,10 @@ def capture_frames():
 
                     records.append(record)
 
-                for rcrd in records:    
-                    person_collection.insert_one(rcrd)
+            for rcrd in records:    
+                person_collection.insert_one(rcrd)
+            
+            main_data.drop(main_data.index, inplace=True)
 
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
