@@ -23,7 +23,7 @@ def generate_random_id():
 
 @shared_task
 def capture_frames3():
-    source = 'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\Videos\\shafaat2.mp4'
+    source = 'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\Videos\\shafaat4.mp4'
 
     cap = cv2.VideoCapture(source)
 
