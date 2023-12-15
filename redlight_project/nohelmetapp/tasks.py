@@ -5,16 +5,16 @@ from celery import shared_task
 import cv2
 import requests
 import base64
-# from .models import person_collection 
-# from ultralytics import YOLO
+from .models import person_collection 
+from ultralytics import YOLO
 import cv2
-# import cvzone
+import cvzone
 import math
-# from .models import nohelmet_collection
+from .models import nohelmet_collection
 
-# from .sort import *
+from .sort import *
 
-# from .myfunctions import *
+from .myfunctions import *
 
 import random
 
@@ -24,185 +24,198 @@ def generate_random_id():
 
 @shared_task
 def capture_frames3():
-    # source = 'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\Videos\\shafaat4.mp4'
+    source = 'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\Videos\\shafaat4.mp4'
 
-    # cap = cv2.VideoCapture(source)
+    cap = cv2.VideoCapture(source)
 
-    # model = YOLO("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\AiModels\\best.pt")
-
-
-    # columns = ['Rider', 'number_plate', 'helmet', 'timestamp', 'ID']
-    # temp_data = pd.DataFrame(columns=columns)
-
-    # columns2 = ['Rider', 'number_plate', "ID"]
-    # nohelmet_data = pd.DataFrame(columns=columns2)
-
-    # classNames = ["NoHelmet", "PlateNumber" , "Rider" , "WithHelmet"]
+    model = YOLO("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\AiModels\\best.pt")
 
 
-    # tracker  = Sort(max_age = 20, min_hits = 3 ,iou_threshold= 0.3)
+    columns = ['Rider', 'number_plate', 'helmet', 'timestamp', 'ID']
+    temp_data = pd.DataFrame(columns=columns)
 
-    # rider_ids = []
-    # plate_ids = []
+    columns2 = ['Rider', 'number_plate', "ID"]
+    nohelmet_data = pd.DataFrame(columns=columns2)
 
-    # # classNames = ["all"]
+    classNames = ["NoHelmet", "PlateNumber" , "Rider" , "WithHelmet"]
 
-    # while(cap.isOpened()):
-    #     success, frame = cap.read()
-    #     if success:
-    #         orifinal_frame = frame.copy()
-    #         #frame = cv2.bitwise_and(frame, mask)
-    #         results = model(frame, stream = True)
-    #         detections = np.empty((0, 5))
 
-    #         rider_list = []
-    #         number_list = []
-    #         nohelmet_list = []
-    #         helmet_list = []
+    tracker  = Sort(max_age = 20, min_hits = 3 ,iou_threshold= 0.3)
 
-    #         for r in results:
-    #             boxes = r.boxes
-    #             for box in boxes:
-    #                 conf = math.ceil((box.conf[0] * 100)) / 100
+    rider_ids = []
+    plate_ids = []
 
-    #                 cls = int(box.cls[0])
+    # classNames = ["all"]
 
-    #                 currentClass = classNames[int(cls)]
-    #                 if conf > 0.3:
+    while(cap.isOpened()):
+        success, frame = cap.read()
+        if success:
+            orifinal_frame = frame.copy()
+            #frame = cv2.bitwise_and(frame, mask)
+            results = model(frame, stream = True)
+            detections = np.empty((0, 5))
+
+            rider_list = []
+            number_list = []
+            nohelmet_list = []
+            helmet_list = []
+
+            for r in results:
+                boxes = r.boxes
+                for box in boxes:
+                    conf = math.ceil((box.conf[0] * 100)) / 100
+
+                    cls = int(box.cls[0])
+
+                    currentClass = classNames[int(cls)]
+                    if conf > 0.3:
                         
-    #                     if cls == 2:
-    #                         x1, y1, x2, y2 = box.xyxy[0]
-    #                         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-    #                         rider_list.append(r)
-    #                         currentArray = np.array([x1,y1,x2,y2,conf])
-    #                         detections = np.vstack((detections, currentArray))
-    #                     elif cls == 1:
-    #                         x1, y1, x2, y2 = box.xyxy[0]
-    #                         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-    #                         numberplate_row = [x1,y1,x2,y2]
-    #                         number_list.append(numberplate_row)
+                        if cls == 2:
+                            x1, y1, x2, y2 = box.xyxy[0]
+                            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                            rider_list.append(r)
+                            currentArray = np.array([x1,y1,x2,y2,conf])
+                            detections = np.vstack((detections, currentArray))
+                        elif cls == 1:
+                            x1, y1, x2, y2 = box.xyxy[0]
+                            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                            numberplate_row = [x1,y1,x2,y2]
+                            number_list.append(numberplate_row)
 
-    #                     elif cls == 0:
-    #                         x1, y1, x2, y2 = box.xyxy[0]
-    #                         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-    #                         nohelmet_row = [x1,y1,x2,y2]
-    #                         nohelmet_list.append(nohelmet_row)
+                        elif cls == 0:
+                            x1, y1, x2, y2 = box.xyxy[0]
+                            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                            nohelmet_row = [x1,y1,x2,y2]
+                            nohelmet_list.append(nohelmet_row)
 
-    #                     elif cls == 3:
-    #                         x1, y1, x2, y2 = box.xyxy[0]
-    #                         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-    #                         helmet_row = [x1,y1,x2,y2]
-    #                         helmet_list.append(helmet_row)
+                        elif cls == 3:
+                            x1, y1, x2, y2 = box.xyxy[0]
+                            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                            helmet_row = [x1,y1,x2,y2]
+                            helmet_list.append(helmet_row)
 
-    #         resultsTracker = tracker.update(detections)
-    #         for rdr in resultsTracker:
-    #             x1r, y1r, x2r, y2r, Id = rdr
-    #             x1r, y1r, x2r,y2r, Id = int(x1r), int(y1r), int(x2r), int(y2r), int(Id)
-    #             current_time = datetime.datetime.now()
-    #             time_stamp = int(current_time.second)
-    #             # Generate a random 6-digit ID
-    #             random_id = generate_random_id()
+            resultsTracker = tracker.update(detections)
+            for rdr in resultsTracker:
+                x1r, y1r, x2r, y2r, Id = rdr
+                x1r, y1r, x2r,y2r, Id = int(x1r), int(y1r), int(x2r), int(y2r), int(Id)
+                current_time = datetime.datetime.now()
+                time_stamp = int(current_time.second)
+                # Generate a random 6-digit ID
+                random_id = generate_random_id()
 
-    #             if Id not in temp_data['ID'].values:
-    #                 row  = {'helmet': True, 'timestamp': time_stamp,'ID': Id}
-    #                 temp_data = temp_data.append(row, ignore_index=True)
+                if Id not in temp_data['ID'].values:
+                    row  = {'helmet': True, 'timestamp': time_stamp,'ID': Id}
+                    temp_data = temp_data.append(row, ignore_index=True)
                     
                     
         
-    #             wr,hr = x2r - x1r , y2r-y1r
-    #             cvzone.cornerRect(frame, (x1r, y1r, wr, hr), l=9 , rt = 2, colorR = (255,0,255))
-    #             cvzone.putTextRect(frame, f"{int(Id)}", (max(0, x1r), max(35, y1r)), scale=2, thickness=3,
-    #                             offset=10)
+                wr,hr = x2r - x1r , y2r-y1r
+                cvzone.cornerRect(frame, (x1r, y1r, wr, hr), l=9 , rt = 2, colorR = (255,0,255))
+                cvzone.putTextRect(frame, f"{int(Id)}", (max(0, x1r), max(35, y1r)), scale=2, thickness=3,
+                                offset=10)
 
-    #             rider_img = orifinal_frame[y1r:y2r , x1r:x2r]
+                rider_img = orifinal_frame[y1r:y2r , x1r:x2r]
 
-    #             if temp_data.loc[temp_data['ID'] == Id, 'helmet'].values[0] == True:
-    #                 rider_coords = [x1r,y1r,x2r,y2r]
-    #                 helmet_present = img_classify(rider_coords, helmet_list , nohelmet_list)
+                if temp_data.loc[temp_data['ID'] == Id, 'helmet'].values[0] == True:
+                    rider_coords = [x1r,y1r,x2r,y2r]
+                    helmet_present = img_classify(rider_coords, helmet_list , nohelmet_list)
 
-    #                 if helmet_present[0] == False: # if helmet absent 
-    #                     temp_data.loc[temp_data['ID'] == Id, 'helmet'] = False
+                    if helmet_present[0] == False: # if helmet absent 
+                        temp_data.loc[temp_data['ID'] == Id, 'helmet'] = False
 
-    #             for hd in nohelmet_list:
-    #                 x1hd, y1hd, x2hd, y2hd = hd
-    #                 x1hd, y1hd, x2hd, y2hd = int(x1hd), int(y1hd), int(x2hd), int(y2hd)
-    #                 w,h = x2hd - x1hd , y2hd-y1hd
-    #                 if inside_box([x1r,y1r,x2r,y2r], [x1hd,y1hd,x2hd,y2hd]):
-    #                     cvzone.cornerRect(frame, (x1hd, y1hd, w, h), l=9 , rt = 2, colorR = (255,0,255))
-    #                     cvzone.putTextRect(frame, f"NO HELMET", (max(0, x1hd), max(35, y1hd)), scale=2, thickness=3,
-    #                                     offset=10)
+                for hd in nohelmet_list:
+                    x1hd, y1hd, x2hd, y2hd = hd
+                    x1hd, y1hd, x2hd, y2hd = int(x1hd), int(y1hd), int(x2hd), int(y2hd)
+                    w,h = x2hd - x1hd , y2hd-y1hd
+                    if inside_box([x1r,y1r,x2r,y2r], [x1hd,y1hd,x2hd,y2hd]):
+                        cvzone.cornerRect(frame, (x1hd, y1hd, w, h), l=9 , rt = 2, colorR = (255,0,255))
+                        cvzone.putTextRect(frame, f"NO HELMET", (max(0, x1hd), max(35, y1hd)), scale=2, thickness=3,
+                                        offset=10)
 
-    #             for num in number_list:
-    #                 x1_num, y1_num, x2_num, y2_num = num
-    #                 if inside_box([x1r,y1r,x2r,y2r], [x1_num, y1_num, x2_num, y2_num]):
+                for num in number_list:
+                    x1_num, y1_num, x2_num, y2_num = num
+                    if inside_box([x1r,y1r,x2r,y2r], [x1_num, y1_num, x2_num, y2_num]):
 
-    #                     if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'number_plate'].values[0]):
-    #                         try:
-    #                             num_img = orifinal_frame[y1_num:y2_num, x1_num:x2_num]
-    #                             cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg', num_img)
-    #                             temp_data.loc[temp_data['ID'] == Id, 'number_plate'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg'
-    #                         except:
-    #                             print('could not save number plate')
+                        if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'number_plate'].values[0]):
+                            try:
+                                num_img = orifinal_frame[y1_num:y2_num, x1_num:x2_num]
+                                cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg', num_img)
+                                temp_data.loc[temp_data['ID'] == Id, 'number_plate'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg'
+                            except:
+                                print('could not save number plate')
 
-    #             if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'Rider'].values[0]):
-    #                 try:
-    #                     cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg', rider_img)
-    #                     temp_data.loc[temp_data['ID'] == Id, 'Rider'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg'
+                if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'Rider'].values[0]):
+                    try:
+                        cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg', rider_img)
+                        temp_data.loc[temp_data['ID'] == Id, 'Rider'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg'
                         
                             
-    #                 except:
-    #                     print('could not save rider')
+                    except:
+                        print('could not save rider')
                     
 
-    #         cv2.imshow("image", frame)
+            cv2.imshow("image2", frame)
+
+            # _, buffer = cv2.imencode('.jpg', frame)
+            # frame_bytes = buffer.tobytes()
+
+            
+
+            # #Encode frame as base64 for transmission
+            # encoded_frame = base64.b64encode(frame_bytes).decode('utf-8')
+
+            # # Send frame to Node.js server
+            # url = 'http://localhost:4000/receive_frame'  # Replace with your Node.js server endpoint
+            # response = requests.post(url, data={'frame': encoded_frame})
+            
 
             
 
         
-    #     else:
-    #         nohelmet_data = extract_and_add_rows(temp_data, nohelmet_data)
-    #         records = []
-    #         for index, row in nohelmet_data.iterrows():
-    #             vehicle_path = row['Rider']
-    #             number_plate_path = row['number_plate']
-    #             ID = row['ID']
+        else:
+            nohelmet_data = extract_and_add_rows(temp_data, nohelmet_data)
+            records = []
+            for index, row in nohelmet_data.iterrows():
+                vehicle_path = row['Rider']
+                number_plate_path = row['number_plate']
+                ID = row['ID']
 
-    #             if vehicle_path is not None and number_plate_path is not None:
-    #                 with open(vehicle_path, "rb") as vehicle_file, open(number_plate_path, "rb") as number_plate_file:
-    #                     vehicle_image = base64.b64encode(vehicle_file.read()).decode('utf-8')
-    #                     number_plate_image = base64.b64encode(number_plate_file.read()).decode('utf-8')
+                if vehicle_path is not None and number_plate_path is not None:
+                    with open(vehicle_path, "rb") as vehicle_file, open(number_plate_path, "rb") as number_plate_file:
+                        vehicle_image = base64.b64encode(vehicle_file.read()).decode('utf-8')
+                        number_plate_image = base64.b64encode(number_plate_file.read()).decode('utf-8')
                             
-    #                 record = {
-    #                     "vehicle": vehicle_image,
-    #                     "number_plate": number_plate_image,
-    #                     "ID": ID
-    #                 }
+                    record = {
+                        "vehicle": vehicle_image,
+                        "number_plate": number_plate_image,
+                        "ID": ID
+                    }
 
-    #                 records.append(record)
+                    records.append(record)
 
-    #         for rcrd in records:    
-    #             nohelmet_collection.insert_one(rcrd)
+            for rcrd in records:    
+                nohelmet_collection.insert_one(rcrd)
             
-    #         nohelmet_data.to_csv('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\nohelmet_data.csv', index=False)
-    #         nohelmet_data.drop(nohelmet_data.index, inplace=True)
-    #         temp_data.drop(temp_data.index, inplace=True)
+            nohelmet_data.to_csv('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\nohelmet_data.csv', index=False)
+            nohelmet_data.drop(nohelmet_data.index, inplace=True)
+            temp_data.drop(temp_data.index, inplace=True)
 
 
-    #         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    #         continue
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            continue
 
 
-    #     if cv2.waitKey(1) & 0xFF == ord('q'):
-    #             break
-
-        
-        
-        
-
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
         
-    # cap.release()
-    # # cv2.destroyAllWindows()
+        
+        
+
+
+        
+    cap.release()
+    cv2.destroyAllWindows()
             
 
     
@@ -240,42 +253,42 @@ def capture_frames3():
 # @shared_task
 # def capture_frames3():
 
-    print("helloooo 3333333333")
-    print("Starting capture_frames task...")
+    # print("helloooo 3333333333")
+    # print("Starting capture_frames task...")
 
-    cap = cv2.VideoCapture('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\motorbikes.mp4')   # Access the default webcam (change 0 if using multiple cameras)
+    # cap = cv2.VideoCapture('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\motorbikes.mp4')   # Access the default webcam (change 0 if using multiple cameras)
 
-    while True:
-        ret, frame = cap.read()
+    # while True:
+    #     ret, frame = cap.read()
 
-        if ret:
-            print("helllodsfdsfdfdsf")
+    #     if ret:
+    #         print("helllodsfdsfdfdsf")
 
-            cv2.imshow("image3", frame)
+    #         cv2.imshow("image3", frame)
     
 
-            _, buffer = cv2.imencode('.jpg', frame)
-            frame_bytes = buffer.tobytes()
+    #         _, buffer = cv2.imencode('.jpg', frame)
+    #         frame_bytes = buffer.tobytes()
 
             
 
-            #Encode frame as base64 for transmission
-            encoded_frame = base64.b64encode(frame_bytes).decode('utf-8')
+    #         #Encode frame as base64 for transmission
+    #         encoded_frame = base64.b64encode(frame_bytes).decode('utf-8')
 
-            # Send frame to Node.js server
-            url = 'http://localhost:4000/receive_frame'  # Replace with your Node.js server endpoint
-            response = requests.post(url, data={'frame': encoded_frame})
+    #         # Send frame to Node.js server
+    #         url = 'http://localhost:4000/receive_frame'  # Replace with your Node.js server endpoint
+    #         response = requests.post(url, data={'frame': encoded_frame})
             
 
-        else: 
-            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            continue
+    #     else: 
+    #         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    #         continue
 
 
 
 
 
-        cv2.waitKey(1)
+    #     cv2.waitKey(1)
 
  
 
