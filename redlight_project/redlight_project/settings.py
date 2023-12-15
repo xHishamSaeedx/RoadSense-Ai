@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "webcam.apps.WebcamConfig",
     "wrong_side.apps.WrongSideConfig",
-    "nohelmetapp.apps.NohelmetappConfig"
+    "nohelmetapp.apps.NohelmetappConfig",
+    "OCRapp.apps.OcrappConfig",
 ]
 
 # Celery Configuration
