@@ -13,6 +13,8 @@ from .sort import *
 import pandas as pd 
 from .models import person_collection , redLight_collection
 import base64
+import random
+
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as img_file:
@@ -34,6 +36,11 @@ def resize_to_720p(img):
 def image_to_base64(image_path):
     with open(image_path, 'rb') as img_file:
         return base64.b64encode(img_file.read()).decode('utf-8')
+
+
+def generate_random_id():
+    return random.randint(100000, 999999)
+
 
 @shared_task
 def capture_frames():
@@ -117,6 +124,8 @@ def capture_frames():
                     x1, y1, x2, y2 , Id = int(x1), int(y1), int(x2), int(y2) , int(Id)
                     print(result)
                     w, h = x2 - x1, y2 - y1
+                    random_id = generate_random_id()
+
                     cvzone.cornerRect(img, (x1, y1, w, h), l=9, rt=2, colorR=(255, 0, 255))
                     cvzone.putTextRect(img, f' {int(Id)}', (max(0, x1), max(35, y1)),
                                     scale=2, thickness=3, offset=10)
@@ -137,6 +146,8 @@ def capture_frames():
                             main_data = main_data.append(row, ignore_index=True)
 
 
+
+                    if Id in main_data['ID'].values:
                         vehicle_img = np.ascontiguousarray(vehicle_img)
                         # #write a code to apply npmodel on the vehicle_img and get back the x1,y1,x2,y2 coords
                         results2 = npmodel(vehicle_img, stream=True)
@@ -155,10 +166,10 @@ def capture_frames():
                             #write a code to crop the numberplate from the vehicle_img using the coords above and save it in a variable
                             numberplate_img = vehicle_img[int(numberplate_coords[1]):int(numberplate_coords[3]),int(numberplate_coords[0]):int(numberplate_coords[2])]
                             #write a code to save numberplate_img in number_plates folder with the name of the id
-                            cv2.imwrite(f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\{Id}.jpg", numberplate_img)
+                            cv2.imwrite(f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\{random_id}.jpg", numberplate_img)
                             index_to_update = main_data.index[main_data['ID'] == Id].tolist()[0]
                             #write a code to find the row in main_data with Id , then update the numberplate column for that row 
-                            main_data.at[index_to_update, 'number_plate'].append(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\{Id}.jpg')
+                            main_data.at[index_to_update, 'number_plate'].append(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\{random_id}.jpg')
 
                         
                         
