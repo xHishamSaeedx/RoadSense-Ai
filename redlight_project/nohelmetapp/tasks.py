@@ -21,10 +21,21 @@ import random
 def generate_random_id():
     return random.randint(100000, 999999)
 
+def image_to_base64(image_path):
+    with open(image_path, 'rb') as img_file:
+        return base64.b64encode(img_file.read()).decode('utf-8')
+
+def resize_to_720p(img):
+    # Read the image
+
+    # Resize the image to 720p (1280x720)
+    resized_img = cv2.resize(img, (1024, 768))
+
+    return resized_img
 
 @shared_task
 def capture_frames3():
-    source = 'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\Videos\\shafaat4.mp4'
+    source = 'C:\\Users\\m_his\\PycharmProjects\\OBJECTDETECT\\yolo with webcam\\shafaattest.MOV'
 
     cap = cv2.VideoCapture(source)
 
@@ -34,8 +45,6 @@ def capture_frames3():
     columns = ['Rider', 'number_plate', 'helmet', 'timestamp', 'ID']
     temp_data = pd.DataFrame(columns=columns)
 
-    columns2 = ['Rider', 'number_plate', "ID"]
-    nohelmet_data = pd.DataFrame(columns=columns2)
 
     classNames = ["NoHelmet", "PlateNumber" , "Rider" , "WithHelmet"]
 
@@ -50,6 +59,7 @@ def capture_frames3():
     while(cap.isOpened()):
         success, frame = cap.read()
         if success:
+            frame = resize_to_720p(frame)
             orifinal_frame = frame.copy()
             #frame = cv2.bitwise_and(frame, mask)
             results = model(frame, stream = True)
@@ -104,7 +114,7 @@ def capture_frames3():
                 random_id = generate_random_id()
 
                 if Id not in temp_data['ID'].values:
-                    row  = {'helmet': True, 'timestamp': time_stamp,'ID': Id}
+                    row  = {'number_plate': [] ,'helmet': True, 'timestamp': time_stamp,'ID': Id}
                     temp_data = temp_data.append(row, ignore_index=True)
                     
                     
@@ -117,11 +127,13 @@ def capture_frames3():
                 rider_img = orifinal_frame[y1r:y2r , x1r:x2r]
 
                 if temp_data.loc[temp_data['ID'] == Id, 'helmet'].values[0] == True:
+
                     rider_coords = [x1r,y1r,x2r,y2r]
                     helmet_present = img_classify(rider_coords, helmet_list , nohelmet_list)
 
                     if helmet_present[0] == False: # if helmet absent 
                         temp_data.loc[temp_data['ID'] == Id, 'helmet'] = False
+
 
                 for hd in nohelmet_list:
                     x1hd, y1hd, x2hd, y2hd = hd
@@ -136,15 +148,18 @@ def capture_frames3():
                     x1_num, y1_num, x2_num, y2_num = num
                     if inside_box([x1r,y1r,x2r,y2r], [x1_num, y1_num, x2_num, y2_num]):
 
-                        if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'number_plate'].values[0]):
-                            try:
-                                num_img = orifinal_frame[y1_num:y2_num, x1_num:x2_num]
-                                cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg', num_img)
-                                temp_data.loc[temp_data['ID'] == Id, 'number_plate'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg'
-                            except:
-                                print('could not save number plate')
+                        
+                        try:
+                            num_img = orifinal_frame[y1_num:y2_num, x1_num:x2_num]
+                            cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg', num_img)
 
-                if pd.isnull(temp_data.loc[temp_data['ID'] == Id, 'Rider'].values[0]):
+                            index_to_update = temp_data.index[temp_data['ID'] == Id].tolist()[0]
+
+                            temp_data.at[index_to_update, 'number_plate'].append(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\number_plates\\{random_id}.jpg')
+
+                        except:
+                            print('could not save number plate')
+
                     try:
                         cv2.imwrite(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg', rider_img)
                         temp_data.loc[temp_data['ID'] == Id, 'Rider'] = f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\{random_id}.jpg'
@@ -173,31 +188,39 @@ def capture_frames3():
 
         
         else:
-            nohelmet_data = extract_and_add_rows(temp_data, nohelmet_data)
+            filtered_data = temp_data[~((temp_data['helmet'] == True) |
+                            (temp_data['number_plate'].apply(lambda x: x == [])) |
+                            (temp_data['Rider'].isna()))]
+
             records = []
-            for index, row in nohelmet_data.iterrows():
+            for index, row in filtered_data.iterrows():
                 vehicle_path = row['Rider']
-                number_plate_path = row['number_plate']
+                number_plate_paths = row['number_plate']
                 ID = row['ID']
 
-                if vehicle_path is not None and number_plate_path is not None:
-                    with open(vehicle_path, "rb") as vehicle_file, open(number_plate_path, "rb") as number_plate_file:
-                        vehicle_image = base64.b64encode(vehicle_file.read()).decode('utf-8')
-                        number_plate_image = base64.b64encode(number_plate_file.read()).decode('utf-8')
-                            
-                    record = {
-                        "vehicle": vehicle_image,
-                        "number_plate": number_plate_image,
-                        "ID": ID
-                    }
+                with open(vehicle_path, 'rb') as vehicle_img_file:
+                    vehicle_img = base64.b64encode(vehicle_img_file.read()).decode('utf-8')
 
-                    records.append(record)
+                number_plate_images = []
+                for plate_path in number_plate_paths:
+                    with open(plate_path, 'rb') as plate_img_file:
+                        number_plate_images.append(base64.b64encode(plate_img_file.read()).decode('utf-8'))
+
+
+                
+                            
+                record = {
+                    "vehicle": vehicle_img,
+                    "number_plate": number_plate_images,
+                    "ID": ID
+                }
+
+                records.append(record)
 
             for rcrd in records:    
                 nohelmet_collection.insert_one(rcrd)
             
-            nohelmet_data.to_csv('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\nohelmet_data.csv', index=False)
-            nohelmet_data.drop(nohelmet_data.index, inplace=True)
+            temp_data.to_csv('C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\nohelmetapp\\riders_pictures\\nohelmet_data.csv', index=False)
             temp_data.drop(temp_data.index, inplace=True)
 
 

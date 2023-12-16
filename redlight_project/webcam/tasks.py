@@ -22,9 +22,23 @@ def image_to_base64(image_path):
         image_json = {"image": encoded_image}
         return image_json
 
+def resize_to_720p(img):
+    # Read the image
+
+    # Resize the image to 720p (1280x720)
+    resized_img = cv2.resize(img, (1024, 768))
+
+    return resized_img
+
+
+def image_to_base64(image_path):
+    with open(image_path, 'rb') as img_file:
+        return base64.b64encode(img_file.read()).decode('utf-8')
+
 @shared_task
 def capture_frames():
-    cap = cv2.VideoCapture("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\Videos\\shafaat3.mp4")  # For Video
+    # cap = cv2.VideoCapture("C:\\Users\\m_his\\PycharmProjects\\OBJECTDETECT\\yolo with webcam\\shafaattest4.MOV") 
+    cap = cv2.VideoCapture("C:\\Users\\m_his\\OneDrive\Pictures\\Documents\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\Videos\\shafaat3.mp4") # For Video
 
     #create a pandas dataframe to store vehicle image path , numberplate and id 
     columns = ['Vehicle', 'number_plate', 'ID']
@@ -50,7 +64,7 @@ def capture_frames():
     # Tracking
     tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
 
-    limits = [0, 420, 480, 420]
+    limits =  [0,420,480,420]
 
     totalCount = []
     flag=False
@@ -58,7 +72,7 @@ def capture_frames():
     while True:
         success, img = cap.read()
         if success:
-            img = np.ascontiguousarray(img)
+            # img = resize_to_720p(img)
             #imgRegion = cv2.bitwise_and(img, mask)
 
             #imgGraphics = cv2.imread("graphics.png", cv2.IMREAD_UNCHANGED)
@@ -119,7 +133,7 @@ def capture_frames():
                         if Id not in main_data['ID'].values:
                             cv2.imwrite(f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\vehicle_pictures\\{Id}.jpg", vehicle_img)
                             #write a code to append a row with in the main_data with this pathway above Vehicle column and Id for ID column
-                            row = {'Vehicle': f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\vehicle_pictures\\{Id}.jpg", 'number_plate': None, 'ID': Id}
+                            row = {'Vehicle': f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\vehicle_pictures\\{Id}.jpg", 'number_plate': [], 'ID': Id}
                             main_data = main_data.append(row, ignore_index=True)
 
 
@@ -142,8 +156,9 @@ def capture_frames():
                             numberplate_img = vehicle_img[int(numberplate_coords[1]):int(numberplate_coords[3]),int(numberplate_coords[0]):int(numberplate_coords[2])]
                             #write a code to save numberplate_img in number_plates folder with the name of the id
                             cv2.imwrite(f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\{Id}.jpg", numberplate_img)
+                            index_to_update = main_data.index[main_data['ID'] == Id].tolist()[0]
                             #write a code to find the row in main_data with Id , then update the numberplate column for that row 
-                            main_data.loc[main_data['ID'] == Id, 'number_plate'] = f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\{Id}.jpg"
+                            main_data.at[index_to_update, 'number_plate'].append(f'C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\webcam\\number_plates\\{Id}.jpg')
 
                         
                         
@@ -176,24 +191,35 @@ def capture_frames():
             #convert main_data to csv file and store it in number_plates folder
             
         else:
+            main_data = main_data[~(
+                            (main_data['Vehicle'].isna()))]
+
             records = []
             for index, row in main_data.iterrows():
                 vehicle_path = row['Vehicle']
-                number_plate_path = row['number_plate']
+                number_plate_paths = row['number_plate']
                 ID = row['ID']
 
-                if vehicle_path is not None and number_plate_path is not None:
-                    with open(vehicle_path, "rb") as vehicle_file, open(number_plate_path, "rb") as number_plate_file:
-                        vehicle_image = base64.b64encode(vehicle_file.read()).decode('utf-8')
-                        number_plate_image = base64.b64encode(number_plate_file.read()).decode('utf-8')
-                            
-                    record = {
-                        "vehicle": vehicle_image,
-                        "number_plate": number_plate_image,
-                        "ID": ID
-                    }
+                with open(vehicle_path, 'rb') as vehicle_img_file:
+                    vehicle_img = base64.b64encode(vehicle_img_file.read()).decode('utf-8')
 
-                    records.append(record)
+                number_plate_images = []
+                for plate_path in number_plate_paths:
+                    with open(plate_path, 'rb') as plate_img_file:
+                        number_plate_images.append(base64.b64encode(plate_img_file.read()).decode('utf-8'))
+
+
+                
+                            
+                record = {
+                    "vehicle": vehicle_img,
+                    "number_plate": number_plate_images,
+                    "ID": ID
+                }
+
+                records.append(record)
+
+                    
 
             for rcrd in records:    
                 redLight_collection.insert_one(rcrd)
