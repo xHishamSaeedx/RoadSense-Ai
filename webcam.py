@@ -17,7 +17,7 @@ while True:
         encoded_frame = base64.b64encode(frame_bytes).decode('utf-8')
 
         # Send frame to Node.js server
-        url = 'http://localhost:4000/receive_frame'  # Replace with your Node.js server endpoint
+        url = 'http://localhost:4000/receive_frame1'  # Replace with your Node.js server endpoint
         response = requests.post(url, data={'frame': encoded_frame})
         print(response.text)  
 
