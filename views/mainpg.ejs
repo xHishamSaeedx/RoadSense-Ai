@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>Display Frame</title>
+    </head>
+        <body>
+
+            <% function clickButtonAutomatically() {
+                setInterval(function() {
+                  var button = document.getElementsByClassName('del_button');// Replace 'yourButtonId' with the ID of your button
+                  if (button) {
+                    console.log("clicked");
+                    button.onclick(); // Simulate a click by calling the onclick event handler
+                  }
+                }, 1000); // 1000 milliseconds = 1 second
+              } %>
+
+            <img class="livevid" id="webcam-feed" src="data:image/jpeg;base64,<%= myFrame %>" />
+            <!-- <form action="/receive_frame" method="get">
+                <button class="del_button" type="submit" >Delete Frame</button>
+            </form> -->
+            <button class="button" type="submit" onclick="updateVariableValue()" >Go live</button>
+
+
+            <script>
+                console.log("inside js file");
+
+            
+                var theImg = document.getElementById("webcam-feed");
+                
+                    function updateVariableValue() {
+                    // AJAX request to get updated variable value
+                    fetch('/send-frame1' , {method :  'POST'})
+                        .then(response => response.text())
+                        .then(data => {
+                            console.log("it shld get updated now ");
+                            //console.log(data.slice(-30));
+
+                            var newFrame = "data:image/jpeg;base64," + data.toString() ;
+                            theImg.src = newFrame;
+                        });
+                    }
+
+                    //console.log(theImg.src.slice(-30));
+
+
+
+                    // Update value initially and then set an interval to update every 0.5 seconds
+                    updateVariableValue();
+                    setInterval(updateVariableValue, 100); //0.10 secs 
+
+            </script>
+
+        </body>
+</html>
