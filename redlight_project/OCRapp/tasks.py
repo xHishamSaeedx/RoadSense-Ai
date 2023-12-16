@@ -31,25 +31,50 @@ def read_text():
         redlightdata = redLight_collection.find()
         wrongsidedata = wrongside_collection.find()
 
-        # for nohelmet in redlightdata:
-        #     Id = nohelmet['_id']
-        #     if Id not in checkid:
-        #         checkid.append(Id)
-        #         decoded_image = base64.b64decode(nohelmet["number_plate"]) 
-        #         nparr = np.frombuffer(decoded_image, np.uint8)
+        for nohelmet in redlightdata:
+            Id = nohelmet['_id']
+            if Id not in checkid:
+                checkid.append(Id)
+
+                plate_list = nohelmet["number_plate"]
+
+                plate = None
+
+                for number in plate_list:
+                    decoded_image = base64.b64decode(number) 
+                    nparr = np.frombuffer(decoded_image, np.uint8)
 
 
-        #         opencv_image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        #         plate = extract_plate(opencv_image)
-                
+                    opencv_image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                    plate = extract_plate(opencv_image)
 
-        #         record = {
-        #                 "vehicle": nohelmet["vehicle"],
-        #                 "number_plate_img": nohelmet["number_plate"],
-        #                 "number_plate": plate,
-        #             }
+                    if plate == None:
+                        continue
+                    
+                    else:
+                        break
+                    
+                if len(plate_list) == 0:
 
-        #         ocr_collection.insert_one(record)
+                    record = {
+                            "vehicle": nohelmet["vehicle"],
+                            "number_plate_img": [],
+                            "number_plate": plate,
+                            'Violation': "Red Light Signal Jumping"
+                        }
+
+                else:
+                    record = {
+                            "vehicle": nohelmet["vehicle"],
+                            "number_plate_img": plate_list[-1],
+                            "number_plate": plate,
+                            'Violation': "Red Light Signal Jumping"
+                        }
+
+
+                ocr_collection.insert_one(record)
+
+
 
         for nohelmet in nohelmetdata:
             Id = nohelmet['_id']
@@ -57,6 +82,8 @@ def read_text():
                 checkid.append(Id)
 
                 plate_list = nohelmet["number_plate"]
+
+                plate = None
 
                 for number in plate_list:
                     decoded_image = base64.b64decode(number) 
@@ -83,25 +110,49 @@ def read_text():
                 ocr_collection.insert_one(record)
 
         
-        # for nohelmet in wrongsidedata:
-        #     Id = nohelmet['_id']
-        #     if Id not in checkid:
-        #         checkid.append(Id)
-        #         decoded_image = base64.b64decode(nohelmet["number_plate"]) 
-        #         nparr = np.frombuffer(decoded_image, np.uint8)
+        for nohelmet in wrongsidedata:
+            Id = nohelmet['_id']
+            if Id not in checkid:
+                checkid.append(Id)
+
+                plate_list = nohelmet["number_plate"]
+                plate = None    
+
+                for number in plate_list:
+                    decoded_image = base64.b64decode(number) 
+                    nparr = np.frombuffer(decoded_image, np.uint8)
 
 
-        #         opencv_image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        #         plate = extract_plate(opencv_image)
-                
+                    opencv_image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                    plate = extract_plate(opencv_image)
 
-        #         record = {
-        #                 "vehicle": nohelmet["vehicle"],
-        #                 "number_plate_img": nohelmet["number_plate"],
-        #                 "number_plate": plate,
-        #             }
+                    if plate == None:
+                        continue
+                    
+                    else:
+                        break
+                    
+                if len(plate_list) == 0:
 
-        #         ocr_collection.insert_one(record)
+                    record = {
+                            "vehicle": nohelmet["vehicle"],
+                            "number_plate_img": [],
+                            "number_plate": plate,
+                            'Violation': "Wrong Side Driving"
+                        }
+
+                else:
+                    record = {
+                            "vehicle": nohelmet["vehicle"],
+                            "number_plate_img": plate_list[-1],
+                            "number_plate": plate,
+                            'Violation': "Wrong Side Driving"
+                        }
+
+
+                ocr_collection.insert_one(record)
+
+        print("done")
 
 
 

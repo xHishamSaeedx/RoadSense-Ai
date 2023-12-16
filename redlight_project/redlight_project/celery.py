@@ -15,7 +15,7 @@ from wrong_side.tasks import capture_frames2
 from nohelmetapp.tasks import capture_frames3
 from OCRapp.tasks import read_text
 
-capture_frames2()
+read_text()
 
 # #Create processes for each function
 # process1 = multiprocessing.Process(target=capture_frames)
