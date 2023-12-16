@@ -2,6 +2,7 @@ const path = require('path');
 
 const express = require('express');
 
+const availableUser = require('./../Database/mongoose').availableUser;
 // const adminController = require('../controllers/admin');
 
 const router = express.Router();                         //basically , using this to route our stuff throu files.
@@ -10,9 +11,27 @@ sumPg = (req , res , next ) =>{
     res.render('sumpg');
 }
 
-router.get('/' , sumPg); 
+router.get('/sum' , sumPg); 
 
 
+router.post('/login' , (req, res, next) =>{
+  // res.sendFile(path.join(__dirname, 'public', 'contact.html'));
+  // res.render('contact');
+  const email_value = req.body.email ;
+  const pswd_value = req.body.password ;
+  // console.log(email_value);
+  if (availableUser(email_value , pswd_value)){
+    console.log("correct user");
+    res.render('index');
+  };
+  
+
+
+})
+
+router.get('/login' , (req, res, next) =>{
+  res.render('contact');
+});
 
 
 let currentFrame = ''; 
@@ -40,10 +59,6 @@ router.post('/receive_frame', (req, res) => {
 
     res.status(200).send("Frame received");
 
-
-
-    // res.body =  {frame : frame} ;
-    // console.log(res.body.frame);
     }
 );
 
@@ -56,7 +71,7 @@ router.post('/send-frame' , (req , res , next) =>{
 
 
 
-router.get('/display_frames', (req, res) => {
+router.get('/display_frames1', (req, res) => {
 
     res.render('mainpg.ejs', {
       myFrame : currentFrame ,
@@ -67,6 +82,35 @@ router.get('/display_frames', (req, res) => {
     // }, 3000);
 
   });
+
+
+router.get('/display_frames2', (req, res) => {
+
+    res.render('mainpg2.ejs', {
+      myFrame : currentFrame ,
+    });
+    
+    // setTimeout(() => {
+    //   res.redirect('/receive_frame');
+    // }, 3000);
+
+  });
+
+router.get('/display_frames3', (req, res) => {
+
+    res.render('mainpg3.ejs', {
+      myFrame : currentFrame ,
+    });
+    
+    // setTimeout(() => {
+    //   res.redirect('/receive_frame');
+    // }, 3000);
+
+  });
+
+
+
+
   
 
 // router.post('/display_frames', (req, res) => {
