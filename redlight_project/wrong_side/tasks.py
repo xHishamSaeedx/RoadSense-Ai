@@ -12,6 +12,7 @@ from .sort import *
 import pandas as pd
 from .models import person_collection , wrongside_collection
 import base64
+import random
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as img_file:
@@ -21,12 +22,25 @@ def image_to_base64(image_path):
         image_json = {"image": encoded_image}
         return image_json
 
+def resize_to_720p(img):
+    # Read the image
+
+    # Resize the image to 720p (1280x720)
+    resized_img = cv2.resize(img, (1024, 768))
+
+    return resized_img
+
+def generate_random_id():
+    return random.randint(100000, 999999)
+
 
 @shared_task
 def capture_frames2():
    
+    filepath = "C:\\Users\\m_his\\PycharmProjects\\OBJECTDETECT\\yolo with webcam\\shafaat.MOV"
+    cap = cv2.VideoCapture(filepath)
     
-    cap = cv2.VideoCapture("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\Videos\\shafaat3.mp4")
+    # cap = cv2.VideoCapture("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\Videos\\shafaat3.mp4")
 
 
     model = YOLO("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\AiModels\\yolov8l.pt")
@@ -49,8 +63,14 @@ def capture_frames2():
 
 
     tracker  = Sort(max_age = 20, min_hits = 3 ,iou_threshold= 0.3)
-    limits2 = [0, 500, 480 , 500 ]
-    limits = [0, 425 , 480 , 425 ]
+
+    
+    # limits2 = [0, 500, 480 , 500 ]
+    # limits = [0, 425 , 480 , 425 ]
+
+    limits = [0, 400 , 1024 , 400 ]
+    limits2 = [0, 500 , 1024 , 500 ]
+
     totalCount = 0
     ids = []
 
@@ -63,6 +83,7 @@ def capture_frames2():
 
     while True:
         success, img = cap.read()
+        
 
         # img = cv2.resize(img, (1920,1080))
         # imgRegion = cv2.bitwise_and(img, mask)
@@ -72,6 +93,7 @@ def capture_frames2():
 
         detections = np.empty((0, 5))
         if success == True:
+            img = resize_to_720p(img)
 
             orifinal_frame = img.copy()
             results = model(img, stream = True)
@@ -115,8 +137,10 @@ def capture_frames2():
                 x1, y1, x2, y2 ,Id= int(x1), int(y1), int(x2), int(y2)  ,int(Id)
                 w,h = x2 - x1 , y2-y1
 
+                random_id = generate_random_id()
+
                 if Id not in temp_data['ID'].values:
-                    row = {'ID': Id, 'check' : True}
+                    row = {'number_plate': [] , 'ID': Id, 'check' : True}
                     temp_data = temp_data.append(row, ignore_index=True)
 
                 cvzone.cornerRect(img, (x1, y1, w, h), l=9 , rt = 2, colorR = (255,0,255))
@@ -168,10 +192,17 @@ def capture_frames2():
                         #write a code to crop the numberplate from the vehicle_img using the coords above and save it in a variable
                         numberplate_img = vehicle_img[int(numberplate_coords[1]):int(numberplate_coords[3]),int(numberplate_coords[0]):int(numberplate_coords[2])]
                         numberplate_img = np.ascontiguousarray(numberplate_img)
+
+                        index_to_update = temp_data.index[temp_data['ID'] == Id].tolist()[0]
+
+
                         #write a code to save numberplate_img in number_plates folder with the name of the id
-                        cv2.imwrite(f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\number_plates\\{Id}.jpg", numberplate_img)
+                        cv2.imwrite(f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\number_plates\\{random_id}.jpg", numberplate_img)
                         #write a code to find the row in main_data with Id , then update the numberplate column for that row 
-                        temp_data.loc[temp_data['ID'] == Id, 'number_plate'] = f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\number_plates\\{Id}.jpg"
+
+                        temp_data.at[index_to_update, 'number_plate'].append(f"C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\number_plates\\{random_id}.jpg")
+
+                        
 
 
 
@@ -194,15 +225,15 @@ def capture_frames2():
             # encoded_frame = base64.b64encode(frame_bytes).decode('utf-8')
 
             # # Send frame to Node.js server
-            # url = 'http://localhost:4000/receive_frame'  # Replace with your Node.js server endpoint
+            # url = 'http://localhost:4000/receive_frame3'  # Replace with your Node.js server endpoint
             # response = requests.post(url, data={'frame': encoded_frame})
 
 
 
         else: 
             filtered_rows = temp_data[(temp_data['wrongside'] == True) & 
-                          temp_data['Vehicle'].notnull() & 
-                          temp_data['number_plate'].notnull()]
+                          temp_data['Vehicle'].notnull()
+                          ]
             main_data = main_data.append(filtered_rows[columns], ignore_index=True)
 
             main_data.to_csv("C:\\Users\\m_his\\OneDrive\\Pictures\\Documents\\GitHub\\Roadsense_django\\redlight_project\\wrong_side\\vehicle_pictures\\nohelmet_data.csv", index=False)
@@ -211,21 +242,27 @@ def capture_frames2():
             records = []
             for index, row in main_data.iterrows():
                 vehicle_path = row['Vehicle']
-                number_plate_path = row['number_plate']
+                number_plate_paths = row['number_plate']
                 ID = row['ID']
 
-                if vehicle_path is not None and number_plate_path is not None:
-                    with open(vehicle_path, "rb") as vehicle_file, open(number_plate_path, "rb") as number_plate_file:
-                        vehicle_image = base64.b64encode(vehicle_file.read()).decode('utf-8')
-                        number_plate_image = base64.b64encode(number_plate_file.read()).decode('utf-8')
-                            
-                    record = {
-                        "vehicle": vehicle_image,
-                        "number_plate": number_plate_image,
-                        "ID": ID
-                    }
+                with open(vehicle_path, 'rb') as vehicle_img_file:
+                    vehicle_img = base64.b64encode(vehicle_img_file.read()).decode('utf-8')
 
-                    records.append(record)
+                number_plate_images = []
+                for plate_path in number_plate_paths:
+                    with open(plate_path, 'rb') as plate_img_file:
+                        number_plate_images.append(base64.b64encode(plate_img_file.read()).decode('utf-8'))
+
+
+                
+                            
+                record = {
+                    "vehicle": vehicle_img,
+                    "number_plate": number_plate_images,
+                    "ID": ID
+                }
+
+                records.append(record)
 
             for rcrd in records:    
                 wrongside_collection.insert_one(rcrd)
