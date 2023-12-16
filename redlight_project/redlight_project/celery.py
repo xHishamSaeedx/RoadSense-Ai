@@ -13,19 +13,23 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 from webcam.tasks import capture_frames
 from wrong_side.tasks import capture_frames2
 from nohelmetapp.tasks import capture_frames3
+from OCRapp.tasks import read_text
 
-
+capture_frames()
 
 # #Create processes for each function
-process1 = multiprocessing.Process(target=capture_frames)
-process2 = multiprocessing.Process(target=capture_frames2)
-process3 = multiprocessing.Process(target=capture_frames3)
+# process1 = multiprocessing.Process(target=capture_frames)
+# process2 = multiprocessing.Process(target=capture_frames2)
+# process3 = multiprocessing.Process(target=capture_frames3)
+# process4 = multiprocessing.Process(target=read_text)
 
-# # Start both processes
-process1.start()
-process2.start()
-process3.start()
-# # Wait for both processes to finish
-process1.join()
-process2.join()
-process3.join()
+# # # Start both processes
+# process1.start()
+# process2.start()
+# process3.start()
+# process4.start()
+# # # Wait for both processes to finish
+# process1.join()
+# process2.join()
+# process3.join()
+# process4.join()
