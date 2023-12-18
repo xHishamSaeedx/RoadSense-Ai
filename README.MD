@@ -14,6 +14,7 @@ We used node js and express js for the website's backend
 
 We used mongodb for the database
 
+[Watch The Video](https://youtu.be/5HeLBuN6AEQ)
 [![Watch the video](https://img.youtube.com/vi/5HeLBuN6AEQ/0.jpg)](https://youtu.be/5HeLBuN6AEQ)
 
 PS: Also download Redis and Mongodb compass, and change the filepaths
