@@ -230,7 +230,7 @@ def capture_frames2():
             encoded_frame = base64.b64encode(frame_bytes).decode('utf-8')
 
             # Send frame to Node.js server
-            url = 'http://localhost:4000/receive_frame3'  # Replace with your Node.js server endpoint
+            url = 'http://localhost:4000/receive_frame2'  # Replace with your Node.js server endpoint
             response = requests.post(url, data={'frame': encoded_frame})
 
 
