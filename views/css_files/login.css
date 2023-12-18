@@ -1,0 +1,60 @@
+/* Container holding the image and the text */
+.container {
+
+    position: relative;
+    height: 310px;
+    width: 340px;
+    padding: 16px;
+    /* margin: 0 auto;
+    margin-top: 100px; */
+    border: 1px solid black;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 20px;
+    /* width: 50%; */
+    margin: 0 auto;
+        /* text-align: center; */
+   }
+   
+   /* Background image */
+   body {
+    align-items: center;
+    align-content: center;
+    background-image: url('https://static.vecteezy.com/system/resources/previews/021/171/635/non_2x/colorful-abstract-wallpaper-modern-background-ai-generated-free-photo.jpg');
+    min-height: 100vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    overflow-y: hidden;
+   }
+   
+   /* Add a background color to the cancel button */
+   .cancelbtn {
+    width: 100%;
+    padding: 14px 20px;
+    margin: 8px 0;
+    background-color: #f44336;
+   }
+   
+   /* Add hover effect to buttons */
+   .btn:hover {
+    opacity: 0.8;
+   }
+   
+   /* Clear floats */
+   .clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+   }
+   
+   /* Change styles for cancel button and signup button on extra small screens */
+   @media screen and (max-width: 300px) {
+    .cancelbtn, .signupbtn {
+        width: 100%;
+    }
+   }
